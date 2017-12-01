@@ -20,7 +20,7 @@ class StringNormalizer(BaseStringNormalizer):
 
 	def __init__(self, keep_stopwords=False, keep_punctuation=False, 
 					all_lowercase=True, short_state_names=True, 
-						full_city_names=True, remove_nonalnum=True):
+						full_city_names=True, remove_nonalnum=True, disamb_country_names=True):
 
 		assert all([isinstance(_, bool) for _ in [keep_stopwords, keep_punctuation, all_lowercase, 
 						short_state_names, full_city_names, remove_nonalnum]]), 'all keyword argument values must be True or False!'
@@ -32,6 +32,7 @@ class StringNormalizer(BaseStringNormalizer):
 		self.opts['short_state_names'] = short_state_names
 		self.opts['full_city_names'] = full_city_names
 		self.opts['remove_nonalnum'] = remove_nonalnum
+		self.opts['disamb_country_names'] = disamb_country_names
 
 		self.state_abbr = {'nsw': 'new south wales', 
 							'vic': 'victoria',
@@ -47,6 +48,15 @@ class StringNormalizer(BaseStringNormalizer):
 								'gold coast': ['gc'],
 								'adelaide': ['adel'],
 								'canberra': ['canb']}
+
+		self.country_variants = {'usa': ['united states of america', 'united states'],
+									'uk': ['united kingdom'],
+									'russia': ['russian federation'],
+									'taiwan': ['chinese taipei'],
+									'korea': ['republic of korea'],
+									'netherlands': ['holland'],
+									'china': ['prc', 'peoples republic of china'],
+									'macedonia': ['fyrom']}
 
 	def _verify_input(self, st):
 
@@ -83,13 +93,20 @@ class StringNormalizer(BaseStringNormalizer):
 				for alt in self.city_variants[cit]:
 					st = re.sub(r'\b{}\b'.format(alt), cit, st.lower())
 
+		if self.opts['disamb_country_names']:
+			for cn in self.country_variants:
+				for alt in self.country_variants[cn]:
+					st = re.sub(r'\b{}\b'.format(alt), cn, st.lower())
+					# and repeat without stopwords
+					st = re.sub(r'\b{}\b'.format(' '.join([w for w in alt.split() if w not in ENGLISH_STOP_WORDS])), cn, st.lower())
+
 
 		return st
 
 if __name__ == '__main__':
 
 	sn = StringNormalizer()
-	print(sn.normalise('this, is an interesting 34- development! %%4#Sydney northern territory and victoria police bris entertainment centre'))
+	print(sn.normalise('this, is an interesting the united states 34- development! %%4#Sydney northern territory, some Russian Federation efforts and victoria police bris entertainment centre'))
 
 
 		
