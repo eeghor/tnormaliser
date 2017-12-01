@@ -3,6 +3,7 @@ from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 import string
 from collections import defaultdict
 import re
+from num2words import num2words
 
 class BaseStringNormalizer(metaclass=ABCMeta):
 
@@ -20,7 +21,8 @@ class StringNormalizer(BaseStringNormalizer):
 
 	def __init__(self, keep_stopwords=False, keep_punctuation=False, 
 					all_lowercase=True, short_state_names=True, 
-						full_city_names=True, remove_nonalnum=True, disamb_country_names=True):
+						full_city_names=True, remove_nonalnum=True, disamb_country_names=True,
+							ints_to_words=True):
 
 		assert all([isinstance(_, bool) for _ in [keep_stopwords, keep_punctuation, all_lowercase, 
 						short_state_names, full_city_names, remove_nonalnum]]), 'all keyword argument values must be True or False!'
@@ -33,6 +35,7 @@ class StringNormalizer(BaseStringNormalizer):
 		self.opts['full_city_names'] = full_city_names
 		self.opts['remove_nonalnum'] = remove_nonalnum
 		self.opts['disamb_country_names'] = disamb_country_names
+		self.opts['ints_to_words'] = ints_to_words
 
 		self.state_abbr = {'nsw': 'new south wales', 
 							'vic': 'victoria',
@@ -99,6 +102,9 @@ class StringNormalizer(BaseStringNormalizer):
 					st = re.sub(r'\b{}\b'.format(alt), cn, st.lower())
 					# and repeat without stopwords
 					st = re.sub(r'\b{}\b'.format(' '.join([w for w in alt.split() if w not in ENGLISH_STOP_WORDS])), cn, st.lower())
+		
+		if self.opts['ints_to_words']:
+			st = ' '.join([num2words(int(w)) if w.isdigit() else w for w in st.split()])
 
 
 		return st
