@@ -4,6 +4,7 @@ import string
 from collections import defaultdict
 import re
 from num2words import num2words
+import arrow
 
 class BaseStringNormalizer(metaclass=ABCMeta):
 
@@ -22,10 +23,10 @@ class StringNormalizer(BaseStringNormalizer):
 	def __init__(self, keep_stopwords=False, keep_punctuation=False, 
 					lowercase=True, short_state_names=True, 
 						full_city_names=True, remove_nonalnum=True, disamb_country_names=True,
-							ints_to_words=True):
+							ints_to_words=True, year_to_label=True):
 
 		assert all([isinstance(_, bool) for _ in [keep_stopwords, keep_punctuation, lowercase, 
-						short_state_names, full_city_names, remove_nonalnum]]), 'all keyword argument values must be True or False!'
+						short_state_names, full_city_names, remove_nonalnum, disamb_country_names, ints_to_words]]), 'all keyword argument values must be True or False!'
 
 		self.opts = defaultdict()
 		self.opts['keep_stopwords'] = keep_stopwords
@@ -36,6 +37,7 @@ class StringNormalizer(BaseStringNormalizer):
 		self.opts['remove_nonalnum'] = remove_nonalnum
 		self.opts['disamb_country_names'] = disamb_country_names
 		self.opts['ints_to_words'] = ints_to_words
+		self.opts['year_to_label'] = year_to_label
 
 		self.state_abbr = {'nsw': 'new south wales', 
 							'vic': 'victoria',
@@ -106,13 +108,20 @@ class StringNormalizer(BaseStringNormalizer):
 		if self.opts['ints_to_words']:
 			st = ' '.join([num2words(int(w)) if w.isdigit() else w for w in st.split()])
 
+		if self.opts['year_to_label']:
+			# attempt to find a year 
+			try:
+				st = st.replace(str(arrow.get(st, 'YYYY').year), '!YEAR!')
+			except:   # if failed to match an exceptinon is thrown
+				pass
+
 
 		return st
 
 if __name__ == '__main__':
 
-	sn = StringNormalizer()
-	print(sn.normalise('this, is an interesting the united states 34- development! %%4#Sydney northern territory, some Russian Federation efforts and victoria police bris entertainment centre'))
+	sn = StringNormalizer(ints_to_words=False)
+	print(sn.normalise('this 2016 tour is the united states 34- development! %%4#Sydney northern territory, some Russian Federation efforts and victoria police bris entertainment centre'))
 
 
 		
