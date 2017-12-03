@@ -1,7 +1,8 @@
 ## Transaction Description Normaliser
 The key purpose of this library is to take care of string normalisation.
+ 
+*tnormaliser.StringNormalizer(keep_stopwords=False, keep_punctuation=False, lowercase=True, short_state_names=True, full_city_names=True, remove_nonalnum=True, disamb_country_names=True, ints_to_words=True, year_to_label=True)*
 
-### Options
 * **keep_stopwords**: *boolean, default False*
 
     ```Specifies whether or not the English stopwords should be removed```
@@ -35,4 +36,7 @@ The key purpose of this library is to take care of string normalisation.
 * **year_to_label**: *boolean, default True*
 
 	```Should all years mentioned in the string be replaced with a placeholder !YEAR!?```
+	
+#### Usage: 
+> tnormaliser.StringNormalizer().normalise(string)
 	

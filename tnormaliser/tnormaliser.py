@@ -61,7 +61,8 @@ class StringNormalizer(BaseStringNormalizer):
 									'korea': ['republic of korea'],
 									'netherlands': ['holland'],
 									'china': ['prc', 'peoples republic of china'],
-									'macedonia': ['fyrom']}
+									'macedonia': ['fyrom'],
+									'new zealand': ['nz']}
 
 	def _verify_input(self, st):
 
