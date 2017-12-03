@@ -20,17 +20,17 @@ class StringNormalizer(BaseStringNormalizer):
 	'''
 
 	def __init__(self, keep_stopwords=False, keep_punctuation=False, 
-					all_lowercase=True, short_state_names=True, 
+					lowercase=True, short_state_names=True, 
 						full_city_names=True, remove_nonalnum=True, disamb_country_names=True,
 							ints_to_words=True):
 
-		assert all([isinstance(_, bool) for _ in [keep_stopwords, keep_punctuation, all_lowercase, 
+		assert all([isinstance(_, bool) for _ in [keep_stopwords, keep_punctuation, lowercase, 
 						short_state_names, full_city_names, remove_nonalnum]]), 'all keyword argument values must be True or False!'
 
 		self.opts = defaultdict()
 		self.opts['keep_stopwords'] = keep_stopwords
 		self.opts['keep_punctuation'] = keep_punctuation
-		self.opts['all_lowercase'] = all_lowercase
+		self.opts['lowercase'] = lowercase
 		self.opts['short_state_names'] = short_state_names
 		self.opts['full_city_names'] = full_city_names
 		self.opts['remove_nonalnum'] = remove_nonalnum
@@ -75,7 +75,7 @@ class StringNormalizer(BaseStringNormalizer):
 
 		self._verify_input(st)
 
-		if self.opts['all_lowercase']:
+		if self.opts['lowercase']:
 			st = st.lower()
 
 		if not self.opts['keep_punctuation']:
