@@ -39,4 +39,10 @@ The key purpose of this library is to take care of string normalisation.
 	
 #### Usage: 
 > tnormaliser.StringNormalizer().normalise(string)
+
+#### Installation
+* Download or clone
+* go to directory where *setup.py* is located and run
+> pip3 install .
+* you should see the message *Successfully installed tnormaliser-0.0.1*
 	
