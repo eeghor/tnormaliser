@@ -1,10 +1,11 @@
 from abc import ABCMeta, abstractmethod
 from sklearn.feature_extraction.text import ENGLISH_STOP_WORDS
 import string
-from collections import defaultdict
+from collections import defaultdict, Counter
 import re
 from num2words import num2words
 import arrow
+import itertools
 
 class BaseStringNormalizer(metaclass=ABCMeta):
 
@@ -23,10 +24,12 @@ class StringNormalizer(BaseStringNormalizer):
 	def __init__(self, keep_stopwords=False, keep_punctuation=False, 
 					lowercase=True, short_state_names=True, 
 						full_city_names=True, remove_nonalnum=True, disamb_country_names=True,
-							ints_to_words=True, year_to_label=True):
+							ints_to_words=True, year_to_label=True, remove_dupl_subsrings=True, max_dupl=4,
+							remove_dupl_words=False):
 
 		assert all([isinstance(_, bool) for _ in [keep_stopwords, keep_punctuation, lowercase, 
-						short_state_names, full_city_names, remove_nonalnum, disamb_country_names, ints_to_words]]), 'all keyword argument values must be True or False!'
+						short_state_names, full_city_names, remove_nonalnum, disamb_country_names, 
+							ints_to_words, year_to_label, remove_dupl_subsrings]]), 'all keyword argument values must be True or False!'
 
 		self.opts = defaultdict()
 		self.opts['keep_stopwords'] = keep_stopwords
@@ -38,6 +41,9 @@ class StringNormalizer(BaseStringNormalizer):
 		self.opts['disamb_country_names'] = disamb_country_names
 		self.opts['ints_to_words'] = ints_to_words
 		self.opts['year_to_label'] = year_to_label
+		self.opts['remove_dupl_subsrings'] = remove_dupl_subsrings
+		self.opts['max_dupl'] = max_dupl
+		self.opts['remove_dupl_words'] = remove_dupl_words
 
 		self.state_abbr = {'nsw': 'new south wales', 
 							'vic': 'victoria',
@@ -49,7 +55,7 @@ class StringNormalizer(BaseStringNormalizer):
 		
 		self.city_variants = {'sydney': ['syd'], 
 								'melbourne': ['mel', 'melb'],
-								'brisbane': ['bris'],
+								'brisbane': ['bris', 'brisb'],
 								'gold coast': ['gc'],
 								'adelaide': ['adel'],
 								'canberra': ['canb']}
@@ -116,13 +122,50 @@ class StringNormalizer(BaseStringNormalizer):
 			except:   # if failed to match an exceptinon is thrown
 				pass
 
+		def remove_dupl_substrings(d, n):
+
+			if n > 1:
+		
+				l = []
+				its = itertools.tee(iter(d.split()),n)
+	
+				for i, _ in enumerate(range(n)):
+					# i moves ahead by i - 1
+					if i > 0:
+						for x in range(i):
+							next(its[i], None)
+			   
+				for p in zip(*its):
+					l.append(p)
+			   
+				for k, v in Counter(l).items():
+					if v > 1:
+						sb = ' '.join(k)
+						for _ in range(v - 1):
+							d = ' '.join(d.rsplit(sb, maxsplit=1))
+			   
+				d = remove_dupl_substrings(d, n-1)
+		
+			return ' '.join(d.split())
+
+
+		if self.opts['remove_dupl_subsrings']:
+
+			st = remove_dupl_substrings(st, self.opts['max_dupl'])   
+
+		if self.opts['remove_dupl_words']:
+			l = []
+			[l.append(_) for _ in st.split() if _ not in l]
+			st = ' '.join(l)   		
 
 		return st
 
+
+
 if __name__ == '__main__':
 
-	sn = StringNormalizer(ints_to_words=False)
-	print(sn.normalise('this 2016 tour is the united states 34- development! %%4#Sydney northern territory, some Russian Federation efforts and victoria police bris entertainment centre'))
+	sn = StringNormalizer(ints_to_words=False, remove_dupl_words=True)
+	print(sn.normalise('this 2016 tour is the united states 34- development! %%4#Sydney the united states northern territory, some Russian Federation efforts and victoria police bris entertainment centre'))
 
 
 		
