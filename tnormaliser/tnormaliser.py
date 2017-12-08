@@ -70,6 +70,8 @@ class StringNormalizer(BaseStringNormalizer):
 									'macedonia': ['fyrom'],
 									'new zealand': ['nz']}
 
+		self.sport_variants = {'united': 'utd', 'city': 'cty', 'fc': 'football club'}
+
 	def _verify_input(self, st):
 
 		assert isinstance(st, str) and len(st) > 0, 'input must be a non-empty string!'
@@ -92,6 +94,9 @@ class StringNormalizer(BaseStringNormalizer):
 
 		if self.opts['remove_nonalnum']:
 			st = ''.join([w for w in st if w.isalnum() or w.isspace()])
+
+		for cn in self.sport_variants:
+				st = re.sub(r'\b{}\b'.format(self.sport_variants[cn]), cn, st.lower())
 
 		if not self.opts['keep_stopwords']:
 			st = ' '.join([w for w in st.split() if self._remove_punctuation(w.lower()) not in ENGLISH_STOP_WORDS])
@@ -165,7 +170,7 @@ class StringNormalizer(BaseStringNormalizer):
 if __name__ == '__main__':
 
 	sn = StringNormalizer(ints_to_words=False, remove_dupl_words=True)
-	print(sn.normalise('this 2016 tour is the united states 34- development! %%4#Sydney the united states northern territory, some Russian Federation efforts and victoria police bris entertainment centre'))
+	print(sn.normalise('this 2016 tour is the united states 34- development! manchester utd and also brighton football club%%4#Sydney the united states northern territory, some Russian Federation efforts and victoria police bris entertainment centre'))
 
 
 		

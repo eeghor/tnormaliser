@@ -1,1 +1,1 @@
-from tnormaliser import StringNormalizer
+from .tnormaliser import StringNormalizer
