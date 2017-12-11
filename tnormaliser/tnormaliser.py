@@ -150,7 +150,9 @@ class StringNormalizer(BaseStringNormalizer):
 			# attempt to find a year 
 			while 1:
 				try:
-					st = st.replace(str(arrow.get(st, 'YYYY').year), '!YEAR!')
+					_ = str(arrow.get(st, 'YYYY').year)
+					if (_[0] == '1' and _[1] in '8 9'.split()) or (_[0] == '2' and _[1] == '0'):
+						st = st.replace(, '!YEAR!')
 				except:   # if failed to match an exceptinon is thrown
 					break
 
