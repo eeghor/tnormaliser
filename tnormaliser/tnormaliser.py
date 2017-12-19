@@ -23,7 +23,7 @@ class StringNormalizer(BaseStringNormalizer):
 	def __init__(self, remove_stopwords=True, remove_punctuation=True, 
 					lowercase=True, short_state_names=True, 
 						full_city_names=True, remove_nonalnum=True, disamb_country_names=True,
-							ints_to_words=True, year_to_label=True, remove_dupl_subsrings=True, max_dupl=4,
+							ints_to_words=False, year_to_label=False, remove_dupl_subsrings=True, max_dupl=4,
 							remove_dupl_words=False):
 
 		assert all([isinstance(_, bool) for _ in [remove_stopwords, remove_punctuation, lowercase, 
@@ -50,7 +50,8 @@ class StringNormalizer(BaseStringNormalizer):
 							'sa': 'south australia',
 							'wa': 'western australia',
 							'act': 'australian capital territory',
-							'nt': 'northern territory'}
+							'nt': 'northern territory',
+							'qld': 'queensland'}
 		
 		self.city_variants = {'sydney': ['syd'], 
 								'melbourne': ['mel', 'melb'],
@@ -150,11 +151,14 @@ class StringNormalizer(BaseStringNormalizer):
 			# attempt to find a year 
 			while 1:
 				try:
-					_ = str(arrow.get(st, 'YYYY').year)
-					if (_[0] == '1' and _[1] in '8 9'.split()) or (_[0] == '2' and _[1] == '0'):
-						st = st.replace(, '!YEAR!')
+					_ = arrow.get(st, 'YYYY').year
+					if str(_)[:2] in {'19', '20', '21'}: 
+						st = st.replace(str(_), '!YEAR!')
+					else:
+						st = st.replace(str(_), '!4DIGITS!')
 				except:   # if failed to match an exceptinon is thrown
 					break
+				
 
 		def remove_dupl_substrings(d, n):
 
